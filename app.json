@@ -1,0 +1,46 @@
+{
+  "name": "Wordlebot",
+  "description": "A Wordle stats app for Slack.",
+  "repository": "https://github.com/gesteves/wordlebot",
+  "addons": [
+    "heroku-postgresql",
+    "heroku-redis",
+    "memcachedcloud",
+    "papertrail"
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/ruby"
+    }
+  ],
+  "env": {
+    "SLACK_CLIENT_ID": {
+      "description": "Client ID of the Slack app.",
+      "required": true
+    },
+    "SLACK_CLIENT_SECRET": {
+      "description": "Client secret for the Slack app.",
+      "required": true
+    }
+  },
+  "environments": {
+    "test": {
+      "addons":[
+        "heroku-postgresql:in-dyno",
+        "heroku-redis:in-dyno"
+      ],
+      "scripts": {
+        "test": "bundle exec rails test"
+      }
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "free"
+    }
+  },
+  "scripts": {
+    "postdeploy": "bundle exec rails db:schema:load && bundle exec rails db:seed"
+  }
+}
