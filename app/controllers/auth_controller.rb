@@ -5,13 +5,15 @@ class AuthController < ApplicationController
       token = slack.get_access_token(code: params[:code], redirect_uri: auth_url)
       if token[:ok]
         access_token = token[:access_token]
+        team_id = token.dig(:team, :id)
         notice = 'Wordlebot was added to your Slack. Yay!'
-        # TODO: Store token, webhook, etc.
+        team = Team.find_or_create_by!(team_id: team_id) do |t|
+          t.access_token = access_token
+        end
+        notice = team.present? ? 'Wordlebot was added to your Slack. Yay!' : 'Authentication failed. Try again!'
       else
         notice = "Authentication failed for the following reason: “#{token[:error]}”. Boo!"
       end
-    else
-      notice = 'Authentication failed. Try again!'
     end
     redirect_to root_url, notice: notice
   end
