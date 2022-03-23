@@ -24,13 +24,7 @@ class Slack
   #       "name": "The Team Name"
   #   },
   #   "enterprise": null,
-  #   "is_enterprise_install": false,
-  #   "incoming_webhook": {
-  #       "channel": "#channel-name",
-  #       "channel_id": "XXXX",
-  #       "configuration_url": "https://...",
-  #       "url": "https://..."
-  #   }
+  #   "is_enterprise_install": false
   # }
   def get_access_token(code:, redirect_uri: nil)
     query = {
@@ -43,13 +37,6 @@ class Slack
     JSON.parse(response.body, symbolize_names: true)
   end
 
-  # Sends a message to a channel through an incoming webhook URL,
-  # received through the OAuth flow.
-  # @param url [String] The URL of the webhook
-  # @param url [Hash] The contents of the message to be posted
-  def send_webhook(url:, payload:)
-    HTTParty.post(url,  body: payload.to_json)
-  end
 
   # Fetches a conversation's history of messages and events.
   # @param channel_id [String] The ID of the channel to fetch history for.
@@ -63,14 +50,25 @@ class Slack
     JSON.parse(response.body, symbolize_names: true)
   end
 
-  # Joins an existing channel.
-  # @param channel_id [String] The ID of the channel to join.
+  # Lists all channels in a Slack team.
   # @param access_token [String] Authentication token bearing required scopes. 
-  # @see https://api.slack.com/methods/conversations.join
+  # @see https://api.slack.com/methods/conversations.list
   # @return [String] A JSON response
-  def conversation_join(channel_id:, access_token:)
-    response = HTTParty.get("https://slack.com/api/conversations.join",
-                            query: { channel: channel_id },
+  def conversations_list(access_token:)
+    response = HTTParty.get("https://slack.com/api/conversations.list",
+                            headers: { 'Authorization': "Bearer #{access_token}" })
+    JSON.parse(response.body, symbolize_names: true)
+  end
+
+  # Sends a message to a channel.
+  # @param access_token [String] Authentication token bearing required scopes. 
+  # @see https://api.slack.com/methods/chat.postMessage
+  # @return [String] A JSON response
+  def post_message(access_token:, text:)
+    response = HTTParty.post("https://slack.com/api/chat.postMessage",
+                            body: {
+                              text: text
+                            }.to_json, 
                             headers: { 'Authorization': "Bearer #{access_token}" })
     JSON.parse(response.body, symbolize_names: true)
   end
