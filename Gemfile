@@ -51,6 +51,9 @@ gem "bootsnap", require: false
 # Support for .env
 gem "figaro"
 
+# I like this for HTTP requests
+gem "httparty"
+
 group :production do
   gem "lograge"
 end
