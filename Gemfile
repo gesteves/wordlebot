@@ -54,6 +54,9 @@ gem "figaro"
 # I like this for HTTP requests
 gem "httparty"
 
+# Let's do some stuff in the background
+gem "sidekiq"
+
 group :production do
   gem "lograge"
 end
