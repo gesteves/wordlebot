@@ -41,11 +41,24 @@ class Slack
   # Fetches a conversation's history of messages and events.
   # @param channel_id [String] The ID of the channel to fetch history for.
   # @param access_token [String] Authentication token bearing required scopes.
+  # @param cursor [String] Used to paginate through collections of data.
+  # @param inclusive [Boolean] Include messages with latest or oldest timestamp in results when either timestamp is specified.
+  # @param limit [Integer] The maximum number of items to return.
+  # @param latest [String] End of time range of messages to include in results. Default is the current time.
+  # @param oldest [String] Start of time range of messages to include in results.
   # @see https://api.slack.com/methods/conversations.history
   # @return [String] A JSON response
-  def conversation_history(channel_id:, access_token:)
+  def conversation_history(channel_id:, access_token:, cursor: nil, inclusive: false, limit: 1000, latest: nil, oldest: nil )
+    query = {
+      channel: channel_id,
+      cursor: cursor,
+      inclusive: inclusive,
+      limit: limit,
+      latest: latest,
+      oldest: oldest
+    }.compact
     response = HTTParty.get("https://slack.com/api/conversations.history",
-                            query: { channel: channel_id },
+                            query: query,
                             headers: { 'Authorization': "Bearer #{access_token}" })
     JSON.parse(response.body, symbolize_names: true)
   end
