@@ -4,7 +4,7 @@ class ProcessTeamWorker < ApplicationWorker
 
     channels = team.channels_bot_is_member_of
     channels.each do |channel|
-      # ProcessChannelWorker.perform_async(channel[:id])
+      ProcessChannelWorker.perform_async(team_id, channel[:id])
     end
   end
 end
