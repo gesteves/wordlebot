@@ -41,4 +41,9 @@ class Team < ApplicationRecord
 
     messages.map { |m| regex.match(m[:text])&.values_at(0) }.compact.flatten
   end
+
+  def post_in_channel(channel_id:, text:, attachments: nil, blocks: nil)
+    slack = Slack.new
+    response = slack.post_message(access_token: access_token, channel_id: channel_id, text: text, attachments: attachments, blocks: blocks)
+  end
 end
