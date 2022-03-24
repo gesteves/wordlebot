@@ -1,4 +1,6 @@
 module Wordle
+  extend ActionView::Helpers::TextHelper
+
   # Returns the number of today's Wordle game.
   # The first Wordle game was on June 19, 2021, so
   # the number of days between that date and now is the
@@ -48,6 +50,65 @@ module Wordle
       five_guesses:  five_guesses,
       six_guesses:   six_guesses,
       failures:      failures
+    }
+  end
+
+  # Returns a Slack block hash with the results for a game.
+  # @param game_number [String] The number of the Wordle game, e.g. 268
+  # @param scores [Array] An array of string with Wordle scores, like "Wordle 123 3/6*"
+  # @return [Hash] A hash with Slack block data.
+  def self.to_slack_blocks(game_number:, scores:)
+    stats = stats(scores)
+
+    blocks = []
+
+    blocks << {
+      type: 'header',
+      text: {
+        type: 'plain_text',
+        text: "Results for Wordle #{game_number}",
+        emoji: true
+      }
+    }
+
+    blocks << {
+      type: "context",
+      elements: [
+        {
+          type: "mrkdwn",
+          text: "#{pluralize(stats[:total_games], 'player')}"
+        }
+      ]
+		}
+
+    blocks << {
+      type: "divider"
+    }
+
+    blocks << result_section(title: '1/6', results: stats[:one_guess], total_games: stats[:total_games])
+    blocks << result_section(title: '2/6', results: stats[:two_guesses], total_games: stats[:total_games])
+    blocks << result_section(title: '3/6', results: stats[:three_guesses], total_games: stats[:total_games])
+    blocks << result_section(title: '4/6', results: stats[:four_guesses], total_games: stats[:total_games])
+    blocks << result_section(title: '5/6', results: stats[:five_guesses], total_games: stats[:total_games])
+    blocks << result_section(title: '6/6', results: stats[:six_guesses], total_games: stats[:total_games])
+    blocks << result_section(title: 'X/6', results: stats[:failures], total_games: stats[:total_games])
+
+    blocks.compact
+  end
+
+  private
+
+  def self.result_section(title:, results:, total_games:, emoji: ":large_green_square:", bg_emoji: ":white_large_square:")
+    return if results == 0
+    max_results = 10
+    scaled_results = ((results.to_f * max_results)/total_games).round
+
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: "*#{title}:* #{pluralize(results, 'player')}\n#{emoji * scaled_results}#{bg_emoji * (max_results - scaled_results)}"
+      }
     }
   end
 end
