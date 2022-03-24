@@ -9,17 +9,36 @@ class Team < ApplicationRecord
   def all_channels
     slack = Slack.new
     channels = []
-    more_results = true
+    has_more = true
     cursor = nil
 
-    while more_results do
+    while has_more do
       response = slack.conversations_list(access_token: access_token, team_id: team_id, cursor: cursor)
       break unless response[:ok]
       channels += response[:channels]
       cursor = response.dig(:response_metadata, :next_cursor)
-      more_results = cursor.present?
+      has_more = cursor.present?
     end
 
     channels
+  end
+
+  def wordle_scores_in_channel(channel_id:, game_number:)
+    regex = Wordle.regex(game_number: game_number)
+    slack = Slack.new
+    messages = []
+    has_more = true
+    latest = Time.now.to_i
+    oldest = 2.days.ago.to_i
+
+    while has_more do
+      response = slack.conversation_history(channel_id: channel_id, access_token: access_token, latest: latest, oldest: oldest)
+      break unless response[:ok]
+      messages += response[:messages]
+      latest = response[:messages]&.last&.dig(:ts)
+      has_more = response[:has_more]
+    end
+
+    messages.map { |m| regex.match(m[:text])&.values_at(0) }.compact.flatten
   end
 end
