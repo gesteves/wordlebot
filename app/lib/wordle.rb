@@ -107,7 +107,7 @@ module Wordle
       type: "section",
       text: {
         type: "mrkdwn",
-        text: "*#{title}:* #{pluralize(results, 'player')}\n#{emoji * scaled_results}#{bg_emoji * (max_results - scaled_results)}"
+        text: "*#{title}* – #{pluralize(results, 'player')}\n#{emoji * scaled_results}#{bg_emoji * (max_results - scaled_results)}"
       }
     }
   end
