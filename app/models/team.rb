@@ -14,7 +14,8 @@ class Team < ApplicationRecord
 
     while has_more do
       response = slack.conversations_list(access_token: access_token, team_id: team_id, cursor: cursor)
-      break unless response[:ok]
+      raise response[:error] unless response[:ok]
+      return unless response[:ok]
       channels += response[:channels]
       cursor = response.dig(:response_metadata, :next_cursor)
       has_more = cursor.present?
@@ -33,7 +34,8 @@ class Team < ApplicationRecord
 
     while has_more do
       response = slack.conversation_history(channel_id: channel_id, access_token: access_token, latest: latest, oldest: oldest)
-      break unless response[:ok]
+      raise response[:error] unless response[:ok]
+      return unless response[:ok]
       messages += response[:messages]
       latest = response[:messages]&.last&.dig(:ts)
       has_more = response[:has_more]
@@ -45,5 +47,6 @@ class Team < ApplicationRecord
   def post_in_channel(channel_id:, text:, attachments: nil, blocks: nil)
     slack = Slack.new
     response = slack.post_message(access_token: access_token, channel_id: channel_id, text: text, attachments: attachments, blocks: blocks)
+    raise response[:error] unless response[:ok]
   end
 end
