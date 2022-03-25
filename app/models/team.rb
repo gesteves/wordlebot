@@ -10,7 +10,9 @@ class Team < ApplicationRecord
   }
 
   def channels_bot_is_member_of
-    all_channels&.select { |c| c[:is_member] }
+    bot_channels = all_channels&.select { |c| c[:is_member] }
+    logger.info "Bot is a member of #{bot_channels&.size}"
+    bot_channels
   end
 
   def all_channels
@@ -28,7 +30,7 @@ class Team < ApplicationRecord
       cursor = response.dig(:response_metadata, :next_cursor)
       has_more = cursor.present?
     end
-
+    logger.info "Found #{channels&.size} channels in team #{team_id}"
     channels
   end
 
@@ -50,7 +52,9 @@ class Team < ApplicationRecord
       has_more = response[:has_more]
     end
 
-    messages.map { |m| regex.match(m[:text])&.values_at(0) }.compact.flatten
+    scores = messages.map { |m| regex.match(m[:text])&.values_at(0) }.compact.flatten
+    logger.info "Found #{scores&.size} scores for Wordle #{game_number} in channel #{channel_id}"
+    scores
   end
 
   def post_in_channel(channel_id:, text:, attachments: nil, blocks: nil)
@@ -58,11 +62,15 @@ class Team < ApplicationRecord
     slack = Slack.new
     response = slack.post_message(access_token: access_token, channel_id: channel_id, text: text, attachments: attachments, blocks: blocks)
     raise response[:error] unless response[:ok]
+    logger.info "Message sent to channel #{channel_id} successfully"
+    response
   end
 
   def has_invalid_token?
     slack = Slack.new
     response = slack.auth_test(access_token: access_token)
-    !response[:ok] && INVALID_AUTH_ERRORS.include?(response[:error])
+    invalid_token = !response[:ok] && INVALID_AUTH_ERRORS.include?(response[:error])
+    logger.error "Team #{team_id} has an invalidated token" if invalid_token
+    invalid_token
   end
 end
