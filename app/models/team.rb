@@ -2,11 +2,19 @@ class Team < ApplicationRecord
   validates :team_id, presence: true, uniqueness: true
   validates :access_token, presence: true
 
+  INVALID_AUTH_ERRORS = %w{
+    invalid_auth
+    account_inactive
+    token_revoked
+    token_expired
+  }
+
   def channels_bot_is_member_of
-    all_channels.select { |c| c[:is_member] }
+    all_channels&.select { |c| c[:is_member] }
   end
 
   def all_channels
+    return if has_invalid_token?
     slack = Slack.new
     channels = []
     has_more = true
@@ -25,6 +33,7 @@ class Team < ApplicationRecord
   end
 
   def wordle_scores_in_channel(channel_id:, game_number:)
+    return if has_invalid_token?
     regex = Wordle.regex(game_number: game_number)
     slack = Slack.new
     messages = []
@@ -45,8 +54,15 @@ class Team < ApplicationRecord
   end
 
   def post_in_channel(channel_id:, text:, attachments: nil, blocks: nil)
+    return if has_invalid_token?
     slack = Slack.new
     response = slack.post_message(access_token: access_token, channel_id: channel_id, text: text, attachments: attachments, blocks: blocks)
     raise response[:error] unless response[:ok]
+  end
+
+  def has_invalid_token?
+    slack = Slack.new
+    response = slack.auth_test(access_token: access_token)
+    !response[:ok] && INVALID_AUTH_ERRORS.include?(response[:error])
   end
 end

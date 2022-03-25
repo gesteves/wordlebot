@@ -20,6 +20,14 @@ class Slack
     JSON.parse(response.body, symbolize_names: true)
   end
 
+  # Checks authentication & identity.
+  # @param access_token [String] Authentication token bearing required scopes.
+  # @see https://api.slack.com/methods/auth.test
+  # @return [String] A JSON response.
+  def auth_test(access_token:)
+    response = HTTParty.post("https://slack.com/api/auth.test", headers: { 'Authorization': "Bearer #{access_token}" })
+    JSON.parse(response.body, symbolize_names: true)
+  end
 
   # Fetches a conversation's history of messages and events.
   # @param channel_id [String] The ID of the channel to fetch history for.
