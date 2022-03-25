@@ -1,6 +1,8 @@
 module Wordle
   extend ActionView::Helpers::TextHelper
 
+  START_DATE = Date.parse("19 Jun 2021")
+
   # Returns the number of today's Wordle game.
   # The first Wordle game was on June 19, 2021, so
   # the number of days between that date and now is the
@@ -8,7 +10,7 @@ module Wordle
   # This completely ignores timezone fuckery, so it may not be perfect.
   # @return [Integer] The number of today's Wordle game.
   def self.todays_game
-    (Time.now.to_date - Date.parse("19 Jun 2021")).to_i
+    (Time.now.to_date - START_DATE).to_i
   end
 
   # Returns the number of yesterday's game.
@@ -76,7 +78,7 @@ module Wordle
       elements: [
         {
           type: "mrkdwn",
-          text: "#{pluralize(stats[:total_games], 'player')}"
+          text: "#{(START_DATE + game_number).strftime('%A, %B %-d, %Y')} – #{pluralize(stats[:total_games], 'player')}"
         }
       ]
 		}
