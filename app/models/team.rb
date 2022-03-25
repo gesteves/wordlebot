@@ -11,7 +11,7 @@ class Team < ApplicationRecord
 
   def channels_bot_is_member_of
     bot_channels = all_channels&.select { |c| c[:is_member] }
-    logger.info "Bot is a member of #{bot_channels&.size}"
+    logger.info "Bot is a member of #{bot_channels&.size} channels"
     bot_channels
   end
 
