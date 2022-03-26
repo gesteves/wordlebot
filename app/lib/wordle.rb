@@ -95,7 +95,7 @@ module Wordle
     max_avatars = 10
     avatar_elements = users.slice(0, max_avatars).map { |a| { type: "image", image_url: a[:image], alt_text: a[:name] } }
     remaining_avatars = users.size - max_avatars
-    avatar_elements << { type: "plain_text", emoji: true, text: "and #{remaining_avatars} more"} if remaining_avatars > 0
+    avatar_elements << { type: "plain_text", emoji: true, text: "…and #{pluralize(remaining_avatars, 'other'}" } if remaining_avatars > 0
 
     blocks << {
       type: "context",
