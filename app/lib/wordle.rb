@@ -27,40 +27,15 @@ module Wordle
     /wordle #{Regexp.quote(game_number.to_s)} (1|2|3|4|5|6|x)\/6(\*)?/i
   end
 
-  # Returns a hash with stats for a Wordle game.
-  # @param scores [Array] An array of string with Wordle scores, like "Wordle 123 3/6*"
-  # @return [Hash] A hash with stats.
-  def self.stats(scores)
-    return if scores.blank?
-    total_games   = scores.size
-    hard_games    = scores.count { |s| s =~ /\*$/ }
-    one_guess     = scores.count { |s| s =~ /1\/6/ }
-    two_guesses   = scores.count { |s| s =~ /2\/6/ }
-    three_guesses = scores.count { |s| s =~ /3\/6/ }
-    four_guesses  = scores.count { |s| s =~ /4\/6/ }
-    five_guesses  = scores.count { |s| s =~ /5\/6/ }
-    six_guesses   = scores.count { |s| s =~ /6\/6/ }
-    failures      = scores.count { |s| s =~ /x\/6/i }
-
-    {
-      total_games:   total_games,
-      hard_games:    hard_games,
-      one_guess:     one_guess,
-      two_guesses:   two_guesses,
-      three_guesses: three_guesses,
-      four_guesses:  four_guesses,
-      five_guesses:  five_guesses,
-      six_guesses:   six_guesses,
-      failures:      failures
-    }
-  end
-
   # Returns a Slack block hash with the results for a game.
   # @param game_number [String] The number of the Wordle game, e.g. 268
   # @param scores [Array] An array of string with Wordle scores, like "Wordle 123 3/6*"
   # @return [Hash] A hash with Slack block data.
   def self.to_slack_blocks(game_number:, scores:)
     stats = stats(scores)
+    users = users(scores)
+
+    total_games = scores.size
 
     blocks = []
 
@@ -78,7 +53,7 @@ module Wordle
       elements: [
         {
           type: "mrkdwn",
-          text: "#{(START_DATE + game_number).strftime('%A, %B %-d, %Y')} – #{pluralize(stats[:total_games], 'player')}"
+          text: "#{(START_DATE + game_number).strftime('%A, %B %-d, %Y')} – #{pluralize(total_games, 'player')}"
         }
       ]
 		}
@@ -87,30 +62,96 @@ module Wordle
       type: "divider"
     }
 
-    blocks << result_section(title: '1/6', results: stats[:one_guess], total_games: stats[:total_games])
-    blocks << result_section(title: '2/6', results: stats[:two_guesses], total_games: stats[:total_games])
-    blocks << result_section(title: '3/6', results: stats[:three_guesses], total_games: stats[:total_games])
-    blocks << result_section(title: '4/6', results: stats[:four_guesses], total_games: stats[:total_games])
-    blocks << result_section(title: '5/6', results: stats[:five_guesses], total_games: stats[:total_games])
-    blocks << result_section(title: '6/6', results: stats[:six_guesses], total_games: stats[:total_games])
-    blocks << result_section(title: 'X/6', results: stats[:failures], total_games: stats[:total_games])
+    blocks += result_section(title: '1/6', results: stats[:one_guess],     users: users[:one_guess],     total_games: total_games)
+    blocks += result_section(title: '2/6', results: stats[:two_guesses],   users: users[:two_guesses],   total_games: total_games)
+    blocks += result_section(title: '3/6', results: stats[:three_guesses], users: users[:three_guesses], total_games: total_games)
+    blocks += result_section(title: '4/6', results: stats[:four_guesses],  users: users[:four_guesses],  total_games: total_games)
+    blocks += result_section(title: '5/6', results: stats[:five_guesses],  users: users[:five_guesses],  total_games: total_games)
+    blocks += result_section(title: '6/6', results: stats[:six_guesses],   users: users[:six_guesses],   total_games: total_games)
+    blocks += result_section(title: 'X/6', results: stats[:failures],      users: users[:failures],      total_games: total_games)
 
     blocks.compact
   end
 
   private
 
-  def self.result_section(title:, results:, total_games:, emoji: ":large_green_square:", bg_emoji: ":white_large_square:")
-    return if results == 0
+  def self.result_section(title:, results:, users:, total_games:, emoji: ":large_green_square:", bg_emoji: ":white_large_square:")
+    return [] if results == 0
     max_results = 10
     scaled_results = ((results.to_f * max_results)/total_games).round
 
-    {
+    blocks = []
+
+    blocks << {
       type: "section",
       text: {
         type: "mrkdwn",
         text: "*#{title}* – #{pluralize(results, 'player')}\n#{emoji * scaled_results}#{bg_emoji * (max_results - scaled_results)}"
       }
+    }
+
+    puts users
+
+    max_avatars = 10
+    avatar_elements = users.slice(0, max_avatars).map { |a| { type: "image", image_url: a[:image], alt_text: a[:name] } }
+    remaining_avatars = users.size - max_avatars
+    avatar_elements << { type: "plain_text", emoji: true, text: "and #{remaining_avatars} more"} if remaining_avatars > 0
+
+    blocks << {
+      type: "context",
+      elements: avatar_elements
+    }
+
+    blocks
+  end
+
+  # Returns a hash with stats for a Wordle game.
+  # @param scores [Array] An array of string with Wordle scores, like "Wordle 123 3/6*"
+  # @return [Hash] A hash with stats.
+  def self.stats(scores)
+    return if scores.blank?
+
+    ones   = scores.select { |s| s[:text] =~ /1\/6/  }
+    twos   = scores.select { |s| s[:text] =~ /2\/6/  }
+    threes = scores.select { |s| s[:text] =~ /3\/6/  }
+    fours  = scores.select { |s| s[:text] =~ /4\/6/  }
+    fives  = scores.select { |s| s[:text] =~ /5\/6/  }
+    sixes  = scores.select { |s| s[:text] =~ /6\/6/  }
+    fails  = scores.select { |s| s[:text] =~ /x\/6/i }
+
+    {
+      one_guess:     ones.size,
+      two_guesses:   twos.size,
+      three_guesses: threes.size,
+      four_guesses:  fours.size,
+      five_guesses:  fives.size,
+      six_guesses:   sixes.size,
+      failures:      fails.size
+    }
+  end
+
+  # Returns a hash with avartars for each Wordle score.
+  # @param scores [Array] An array of string with Wordle scores, like "Wordle 123 3/6*"
+  # @return [Hash] A hash with avatars.
+  def self.users(scores)
+    return if scores.blank?
+
+    ones   = scores.select { |s| s[:text] =~ /1\/6/  }.each { |m| m.delete(:text) }
+    twos   = scores.select { |s| s[:text] =~ /2\/6/  }.each { |m| m.delete(:text) }
+    threes = scores.select { |s| s[:text] =~ /3\/6/  }.each { |m| m.delete(:text) }
+    fours  = scores.select { |s| s[:text] =~ /4\/6/  }.each { |m| m.delete(:text) }
+    fives  = scores.select { |s| s[:text] =~ /5\/6/  }.each { |m| m.delete(:text) }
+    sixes  = scores.select { |s| s[:text] =~ /6\/6/  }.each { |m| m.delete(:text) }
+    fails  = scores.select { |s| s[:text] =~ /x\/6/i }.each { |m| m.delete(:text) }
+
+    {
+      one_guess:       ones,
+      two_guesses:     twos,
+      three_guesses: threes,
+      four_guesses:   fours,
+      five_guesses:   fives,
+      six_guesses:    sixes,
+      failures:       fails
     }
   end
 end

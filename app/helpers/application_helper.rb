@@ -7,6 +7,7 @@ module ApplicationHelper
       channels:read
       groups:read
       chat:write
+      users:read
     }
     params = {
       client_id: ENV['SLACK_CLIENT_ID'],
