@@ -130,19 +130,19 @@ module Wordle
     }
   end
 
-  # Returns a hash with avartars for each Wordle score.
+  # Returns a hash with avatars for each Wordle score.
   # @param scores [Array] An array of string with Wordle scores, like "Wordle 123 3/6*"
   # @return [Hash] A hash with avatars.
   def self.users(scores)
     return if scores.blank?
 
-    ones   = scores.select { |s| s[:text] =~ /1\/6/  }.each { |m| m.delete(:text) }
-    twos   = scores.select { |s| s[:text] =~ /2\/6/  }.each { |m| m.delete(:text) }
-    threes = scores.select { |s| s[:text] =~ /3\/6/  }.each { |m| m.delete(:text) }
-    fours  = scores.select { |s| s[:text] =~ /4\/6/  }.each { |m| m.delete(:text) }
-    fives  = scores.select { |s| s[:text] =~ /5\/6/  }.each { |m| m.delete(:text) }
-    sixes  = scores.select { |s| s[:text] =~ /6\/6/  }.each { |m| m.delete(:text) }
-    fails  = scores.select { |s| s[:text] =~ /x\/6/i }.each { |m| m.delete(:text) }
+    ones   = scores.select { |s| s[:text] =~ /1\/6/  }.reject { |m| m[:image].blank? }.each { |m| m.delete(:text) }
+    twos   = scores.select { |s| s[:text] =~ /2\/6/  }.reject { |m| m[:image].blank? }.each { |m| m.delete(:text) }
+    threes = scores.select { |s| s[:text] =~ /3\/6/  }.reject { |m| m[:image].blank? }.each { |m| m.delete(:text) }
+    fours  = scores.select { |s| s[:text] =~ /4\/6/  }.reject { |m| m[:image].blank? }.each { |m| m.delete(:text) }
+    fives  = scores.select { |s| s[:text] =~ /5\/6/  }.reject { |m| m[:image].blank? }.each { |m| m.delete(:text) }
+    sixes  = scores.select { |s| s[:text] =~ /6\/6/  }.reject { |m| m[:image].blank? }.each { |m| m.delete(:text) }
+    fails  = scores.select { |s| s[:text] =~ /x\/6/i }.reject { |m| m[:image].blank? }.each { |m| m.delete(:text) }
 
     {
       one_guess:       ones,
