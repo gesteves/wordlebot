@@ -108,7 +108,7 @@ module Wordle
   end
 
   # Returns a hash with stats for a Wordle game.
-  # @param scores [Array] An array of string with Wordle scores, like "Wordle 123 3/6*"
+  # @param scores [Array] An array of hashes with Wordle scores
   # @return [Hash] A hash with stats.
   def self.stats(scores)
     return if scores.blank?
@@ -133,7 +133,7 @@ module Wordle
   end
 
   # Returns a hash with avatars for each Wordle score.
-  # @param scores [Array] An array of string with Wordle scores, like "Wordle 123 3/6*"
+  # @param scores [Array] An array of hashes with Wordle scores
   # @return [Hash] A hash with avatars.
   def self.users(scores)
     return if scores.blank?
