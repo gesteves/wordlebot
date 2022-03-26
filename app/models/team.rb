@@ -52,7 +52,7 @@ class Team < ApplicationRecord
       has_more = response[:has_more]
     end
 
-    scores = messages.map { |m| regex.match(m[:text])&.values_at(0) }.compact.flatten
+    scores = messages.map { |m| clean_up_message(message: m, regex: regex) }.compact
     logger.info "Found #{scores&.size} scores for Wordle #{game_number} in channel #{channel_id}"
     scores
   end
@@ -72,5 +72,25 @@ class Team < ApplicationRecord
     invalid_token = !response[:ok] && INVALID_AUTH_ERRORS.include?(response[:error])
     logger.error "Team #{team_id} has an invalidated token" if invalid_token
     invalid_token
+  end
+
+  private
+
+  def clean_up_message(message:, regex:)
+    slack = Slack.new
+    user_id = message[:user]
+    text = regex.match(message[:text])&.values_at(0)&.first
+    return if text.blank?
+    response = slack.user_info(access_token: access_token, user_id: user_id)
+    raise response[:error] unless response[:ok]
+    image = response.dig(:user, :profile, :image_512)
+    name = response.dig(:user, :real_name) || response.dig(:user, :name)
+
+    {
+      text: text,
+      user: user_id,
+      image: image,
+      name: name
+    }
   end
 end

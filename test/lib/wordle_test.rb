@@ -33,15 +33,18 @@ class WordleTest < ActiveSupport::TestCase
   end
 
   test "generates states for a set of scores" do
-    scores = ["Wordle 200 1/6", "Wordle 200 2/6*", "Wordle 200 2/6", "Wordle 200 x/6"]
+    scores = [
+      {:text=>"Wordle 279 4/6*", :user=>"U0LS19PDZ", :image=>"https://avatars.slack-edge.com/2022-03-15/3247816561940_9a4009a3bc552011210b_512.png", :name=>"Guillermo Esteves"},
+      {:text=>"Wordle 279 4/6", :user=>"U0NA8QJ3Z", :image=>"https://avatars.slack-edge.com/2022-03-15/3248153495108_87f91a5279b4f238393b_512.png", :name=>"Kate Birmingham"},
+      {:text=>"Wordle 279 3/6*", :user=>"U037X50K6M6", :image=>"https://avatars.slack-edge.com/2022-03-15/3269247664096_3db2a53df116359ca510_512.jpg", :name=>"Marie Connelly"}
+    ]
     stats = Wordle.stats(scores)
-    assert_equal 4, stats[:total_games]
-    assert_equal 1, stats[:one_guess]
-    assert_equal 2, stats[:two_guesses]
-    assert_equal 0, stats[:three_guesses]
-    assert_equal 0, stats[:four_guesses]
+    assert_equal 0, stats[:one_guess]
+    assert_equal 0, stats[:two_guesses]
+    assert_equal 1, stats[:three_guesses]
+    assert_equal 2, stats[:four_guesses]
     assert_equal 0, stats[:five_guesses]
     assert_equal 0, stats[:six_guesses]
-    assert_equal 1, stats[:failures]
+    assert_equal 0, stats[:failures]
   end
 end

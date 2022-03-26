@@ -125,4 +125,19 @@ class Slack
                             headers: { 'Authorization': "Bearer #{access_token}", 'Content-Type': 'application/json' })
     JSON.parse(response.body, symbolize_names: true)
   end
+
+  # Gets information about a user.
+  # @param access_token [String] Authentication token bearing required scopes.
+  # @param user_id [String] User to get info on
+  # @see https://api.slack.com/methods/users.info
+  # @return [String] A JSON response.
+  def user_info(access_token:, user_id:)
+    query = {
+      user: user_id
+    }.compact
+    response = HTTParty.get("https://slack.com/api/users.info",
+                            query: query,
+                            headers: { 'Authorization': "Bearer #{access_token}" })
+    JSON.parse(response.body, symbolize_names: true)
+  end
 end
