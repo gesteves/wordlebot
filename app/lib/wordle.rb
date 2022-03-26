@@ -70,6 +70,10 @@ module Wordle
     blocks += result_section(title: '6/6', results: stats[:six_guesses],   users: users[:six_guesses],   total_games: total_games)
     blocks += result_section(title: 'X/6', results: stats[:failures],      users: users[:failures],      total_games: total_games)
 
+    blocks << {
+      type: "divider"
+    }
+
     blocks.compact
   end
 
