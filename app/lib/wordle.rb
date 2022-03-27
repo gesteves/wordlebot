@@ -95,7 +95,7 @@ module Wordle
     }
 
     avatar_elements = users.select { |u| u[:name].present? && u[:image].present? }.slice(0, 10).map { |u| { type: "image", image_url: u[:image], alt_text: u[:name] } }
-    remaining_avatars = users.size - avatar_elements
+    remaining_avatars = users.size - avatar_elements.size
     avatar_elements << { type: "plain_text", emoji: true, text: "+ #{pluralize(remaining_avatars, 'other')}" } if remaining_avatars > 0
 
     blocks << {
