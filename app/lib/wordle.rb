@@ -94,9 +94,8 @@ module Wordle
       }
     }
 
-    max_avatars = 10
-    avatar_elements = users.slice(0, max_avatars).map { |a| { type: "image", image_url: a[:image], alt_text: a[:name] } }
-    remaining_avatars = users.size - max_avatars
+    avatar_elements = users.select { |u| u[:name].present? && u[:image].present? }.slice(0, 10).map { |u| { type: "image", image_url: u[:image], alt_text: u[:name] } }
+    remaining_avatars = users.size - avatar_elements
     avatar_elements << { type: "plain_text", emoji: true, text: "+ #{pluralize(remaining_avatars, 'other')}" } if remaining_avatars > 0
 
     blocks << {
@@ -138,13 +137,13 @@ module Wordle
   def self.users(scores)
     return if scores.blank?
 
-    ones   = scores.select { |s| s[:text] =~ /1\/6/  }.reject { |m| m[:image].blank? }.each { |m| m.delete(:text) }
-    twos   = scores.select { |s| s[:text] =~ /2\/6/  }.reject { |m| m[:image].blank? }.each { |m| m.delete(:text) }
-    threes = scores.select { |s| s[:text] =~ /3\/6/  }.reject { |m| m[:image].blank? }.each { |m| m.delete(:text) }
-    fours  = scores.select { |s| s[:text] =~ /4\/6/  }.reject { |m| m[:image].blank? }.each { |m| m.delete(:text) }
-    fives  = scores.select { |s| s[:text] =~ /5\/6/  }.reject { |m| m[:image].blank? }.each { |m| m.delete(:text) }
-    sixes  = scores.select { |s| s[:text] =~ /6\/6/  }.reject { |m| m[:image].blank? }.each { |m| m.delete(:text) }
-    fails  = scores.select { |s| s[:text] =~ /x\/6/i }.reject { |m| m[:image].blank? }.each { |m| m.delete(:text) }
+    ones   = scores.select { |s| s[:text] =~ /1\/6/  }.each { |m| m.delete(:text) }
+    twos   = scores.select { |s| s[:text] =~ /2\/6/  }.each { |m| m.delete(:text) }
+    threes = scores.select { |s| s[:text] =~ /3\/6/  }.each { |m| m.delete(:text) }
+    fours  = scores.select { |s| s[:text] =~ /4\/6/  }.each { |m| m.delete(:text) }
+    fives  = scores.select { |s| s[:text] =~ /5\/6/  }.each { |m| m.delete(:text) }
+    sixes  = scores.select { |s| s[:text] =~ /6\/6/  }.each { |m| m.delete(:text) }
+    fails  = scores.select { |s| s[:text] =~ /x\/6/i }.each { |m| m.delete(:text) }
 
     {
       one_guess:       ones,
