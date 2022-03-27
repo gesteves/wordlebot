@@ -47,4 +47,29 @@ class WordleTest < ActiveSupport::TestCase
     assert_equal 0, stats[:six_guesses]
     assert_equal 0, stats[:failures]
   end
+
+  test "generates slack blocks for a set of scores" do
+    scores = [
+      { text: "Wordle 280 1/6", user: "ABCD1234", image: "https://api.slack.com/img/blocks/bkb_template_images/profile_1.png", name: "Michael Scott" },
+      { text: "Wordle 280 2/6", user: "ABCD1235", image: "https://api.slack.com/img/blocks/bkb_template_images/profile_2.png", name: "Dwight Schrute" },
+      { text: "Wordle 280 4/6", user: "ABCD1236", image: "https://api.slack.com/img/blocks/bkb_template_images/profile_3.png", name: "Pam Beasely" },
+      { text: "Wordle 280 4/6", user: "ABCD1237", name: "Jim Halpert" }
+    ]
+    blocks = Wordle.to_slack_blocks(game_number: 280, scores: scores)
+
+    assert_equal "Results for Wordle 280", blocks.find { |b| b[:type] == 'header'}.dig(:text, :text), "The header text is wrong"
+
+    assert_equal 3, blocks.select { |b| b[:type] == 'section' }.size, "There should be 3 sections"
+    assert_equal 1, blocks.select { |b| b[:type] == 'context' }[1][:elements].size, "This context should have 1 element"
+    assert_equal 1, blocks.select { |b| b[:type] == 'context' }[2][:elements].size, "This context should have 1 element"
+    assert_equal 2, blocks.select { |b| b[:type] == 'context' }[3][:elements].size, "This context should have 2 elements"
+
+    assert blocks.select { |b| b[:type] == 'section' }[0][:text][:text] =~ /^\*1\/6\*/, "This section should show the 1/6 score"
+    assert blocks.select { |b| b[:type] == 'section' }[1][:text][:text] =~ /^\*2\/6\*/, "This section should show the 2/6 score"
+    assert blocks.select { |b| b[:type] == 'section' }[2][:text][:text] =~ /^\*4\/6\*/, "This section should show the 4/6 score"
+
+    assert_equal "Michael Scott", blocks.select { |b| b[:type] == 'context' }[1][:elements][0][:alt_text], "This context should contain Michael Scott"
+    assert_equal "Dwight Schrute", blocks.select { |b| b[:type] == 'context' }[2][:elements][0][:alt_text], "This context should contain Dwight Schrute"
+    assert_equal "Pam Beasely", blocks.select { |b| b[:type] == 'context' }[3][:elements][0][:alt_text], "This context should contain Pam Beasely"
+  end
 end
