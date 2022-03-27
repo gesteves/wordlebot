@@ -18,6 +18,9 @@ class AuthController < ApplicationController
         logger.error "Authentication failed for the following reason: #{token[:error]}"
         notice = "Oh no, something went wrong. Please try again!"
       end
+    elsif params[:error].present?
+      logger.error "Authentication failed for the following reason: #{params[:error]}"
+      notice = "Wordlebot was not added to your Slack. Please try again!"
     end
     redirect_to root_url, notice: notice
   end
