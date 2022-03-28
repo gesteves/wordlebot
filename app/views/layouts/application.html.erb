@@ -9,9 +9,9 @@
   </head>
 
   <body>
-    <% flash.each do |name, msg| -%>
-      <p><%= msg %></p>
-    <% end -%>
-    <%= yield %>
+    <div class="content">
+      <h1>Wordlebot</h1>
+      <%= yield %>
+    </div>
   </body>
 </html>

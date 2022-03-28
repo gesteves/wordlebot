@@ -10,7 +10,7 @@ class AuthController < ApplicationController
         team.access_token = access_token
         if team.save
           logger.info "Team #{team_id} authenticated with the following scopes: #{token[:scope]}"
-          notice = 'Wordlebot was added to your Slack, don’t forget to invite it into your Wordle channels. Yay!'
+          redirect_to success_url
         else
           notice = 'Oh no, something went wrong. Please try again!'
         end
