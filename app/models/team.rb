@@ -54,7 +54,7 @@ include ActionView::Helpers::TextHelper
       has_more = response[:has_more]
     end
 
-    scores = messages.map { |m| clean_up_message(message: m, regex: regex) }.compact
+    scores = messages.map { |m| clean_up_message(message: m, regex: regex) }.compact.uniq { |m| m[:user] }
     logger.info "Found #{pluralize(scores&.size, 'score')} for Wordle #{game_number} in channel #{channel_id}"
     scores
   end
