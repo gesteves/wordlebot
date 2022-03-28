@@ -68,7 +68,7 @@ module Wordle
     blocks += result_section(title: '4/6', results: stats[:four_guesses],  users: users[:four_guesses],  total_games: total_games)
     blocks += result_section(title: '5/6', results: stats[:five_guesses],  users: users[:five_guesses],  total_games: total_games)
     blocks += result_section(title: '6/6', results: stats[:six_guesses],   users: users[:six_guesses],   total_games: total_games)
-    blocks += result_section(title: 'X/6', results: stats[:failures],      users: users[:failures],      total_games: total_games)
+    blocks += result_section(title: 'X/6', results: stats[:failures],      users: users[:failures],      total_games: total_games, emoji: ":large_red_square:")
 
     blocks << {
       type: "divider"
