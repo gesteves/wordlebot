@@ -1,4 +1,6 @@
 class Team < ApplicationRecord
+include ActionView::Helpers::TextHelper
+
   validates :team_id, presence: true, uniqueness: true
   validates :access_token, presence: true
 
@@ -11,7 +13,7 @@ class Team < ApplicationRecord
 
   def channels_bot_is_member_of
     bot_channels = all_channels&.select { |c| c[:is_member] }
-    logger.info "Bot is a member of #{bot_channels&.size} channels"
+    logger.info "Wordlebot is a member of #{pluralize(bot_channels&.size, 'channel')}"
     bot_channels
   end
 
@@ -30,7 +32,7 @@ class Team < ApplicationRecord
       cursor = response.dig(:response_metadata, :next_cursor)
       has_more = cursor.present?
     end
-    logger.info "Found #{channels&.size} channels in team #{team_id}"
+    logger.info "Found #{pluralize(channels&.size, 'channel')} in team #{team_id}"
     channels
   end
 
@@ -53,7 +55,7 @@ class Team < ApplicationRecord
     end
 
     scores = messages.map { |m| clean_up_message(message: m, regex: regex) }.compact
-    logger.info "Found #{scores&.size} scores for Wordle #{game_number} in channel #{channel_id}"
+    logger.info "Found #{pluralize(scores&.size, 'score')} for Wordle #{game_number} in channel #{channel_id}"
     scores
   end
 
@@ -62,7 +64,7 @@ class Team < ApplicationRecord
     slack = Slack.new
     response = slack.post_message(access_token: access_token, channel_id: channel_id, text: text, attachments: attachments, blocks: blocks)
     raise response[:error] unless response[:ok]
-    logger.info "Message sent to channel #{channel_id} successfully"
+    logger.info "Message sent to channel #{channel_id}"
     response
   end
 
