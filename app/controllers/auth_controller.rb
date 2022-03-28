@@ -1,9 +1,9 @@
 class AuthController < ApplicationController
   def index
+    url = root_url
     if params[:code].present?
       slack = Slack.new
       token = slack.get_access_token(code: params[:code], redirect_uri: auth_url)
-      url = root_url
       if token[:ok]
         access_token = token[:access_token]
         team_id = token.dig(:team, :id)
