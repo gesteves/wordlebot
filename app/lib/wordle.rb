@@ -94,12 +94,12 @@ module Wordle
       }
     }
 
-    avatar_elements = users.select { |u| u[:name].present? && u[:image].present? }.slice(0, 10).map { |u| { type: "image", image_url: u[:image], alt_text: u[:name] } }
+    avatars = users.select { |u| u[:image].present? }.slice(0, 10).map { |u| { type: "image", image_url: u[:image], alt_text: u[:name] } }
 
-    if avatar_elements.present?
-      remaining_avatars = users.size - avatar_elements.size
-      avatar_elements << { type: "plain_text", emoji: true, text: "+ #{remaining_avatars} more" } if remaining_avatars > 0
-      blocks << { type: "context", elements: avatar_elements }
+    if avatars.present?
+      remaining_users = users.size - avatars.size
+      avatars << { type: "plain_text", emoji: true, text: "+ #{remaining_users} more" } if remaining_users > 0
+      blocks << { type: "context", elements: avatars }
     end
 
     blocks
