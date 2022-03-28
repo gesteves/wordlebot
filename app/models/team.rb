@@ -83,14 +83,17 @@ class Team < ApplicationRecord
     return if text.blank?
     response = slack.user_info(access_token: access_token, user_id: user_id)
     raise response[:error] unless response[:ok]
-    image = [response.dig(:user, :profile, :image_512), response.dig(:user, :profile, :image_192), response.dig(:user, :profile, :image_48), response.dig(:user, :profile, :image_32), response.dig(:user, :profile, :image_original)].reject(&:blank?).first
+    image = response.dig(:user, :profile, :image_512).presence || response.dig(:user, :profile, :image_192).presence || response.dig(:user, :profile, :image_48).presence || response.dig(:user, :profile, :image_32).presence || response.dig(:user, :profile, :image_original).presence
     name = response.dig(:user, :real_name) || response.dig(:user, :name)
 
-    {
+    user = {
       text: text,
       user: user_id,
       image: image,
       name: name
     }
+
+    logger.info user if ENV['DEBUG'].present?
+    user
   end
 end
