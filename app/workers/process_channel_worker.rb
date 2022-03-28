@@ -8,7 +8,11 @@ class ProcessChannelWorker < ApplicationWorker
     text = "Results for Wordle #{Wordle.yesterdays_game}"
     blocks = Wordle.to_slack_blocks(game_number: Wordle.yesterdays_game, scores: scores)
 
-    team.post_in_channel(channel_id: channel_id, text: text, blocks: blocks) unless ENV['DEBUG'].present?
+    if ENV['DEBUG'].present?
+      logger.info blocks 
+    else
+      team.post_in_channel(channel_id: channel_id, text: text, blocks: blocks)
+    end
   end
 
 end
