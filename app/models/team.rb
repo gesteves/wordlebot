@@ -85,7 +85,7 @@ include ActionView::Helpers::TextHelper
     return if text.blank?
     response = slack.user_info(access_token: access_token, user_id: user_id)
     raise response[:error] unless response[:ok]
-    image = response.dig(:user, :profile, :image_original).presence
+    image = response.dig(:user, :profile, :image_192).presence || response.dig(:user, :profile, :image_72).presence || response.dig(:user, :profile, :image_48).presence  || response.dig(:user, :profile, :image_32).presence  || response.dig(:user, :profile, :image_24).presence  || response.dig(:user, :profile, :image_original).presence
     name = response.dig(:user, :real_name).presence || response.dig(:user, :name).presence
 
     {
