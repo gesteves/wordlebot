@@ -7,6 +7,8 @@ class EventsController < ApplicationController
     case event_type
     when 'url_verification'
       verify_url
+    when 'app_mention'
+      app_mention
     end
   end
 
@@ -14,5 +16,15 @@ class EventsController < ApplicationController
 
   def verify_url
     render plain: params[:challenge], status: 200
+  end
+
+  def app_mention
+    team_id = params[:team_id]
+    channel = params.dig(:event, :channel)
+    text = params.dig(:event, :text)
+    regex = /wordle (\d+)/i
+    game_number = regex.match(text)&.values_at(1)&.first
+    ProcessChannelWorker.perform_async(team_id, channel, game_number, true)
+    render plain: "OK", status: 200
   end
 end
