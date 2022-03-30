@@ -4,7 +4,7 @@ Rails.application.routes.draw do
   get "/auth"    => "auth#index", :as => "auth"
   get "/success" => "home#success", :as => "success"
 
-  post 'slack/events' => "events#index"
+  post 'slack/events' => "events#index", :as => "events"
   # Defines the root path route ("/")
   root "home#index"
 end
