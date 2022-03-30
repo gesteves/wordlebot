@@ -24,7 +24,7 @@ class EventsController < ApplicationController
     text = params.dig(:event, :text)
     regex = /wordle (\d+)/i
     game_number = regex.match(text)&.values_at(1)&.first
-    ProcessChannelWorker.perform_async(team.id, channel, game_number, true)
+    ProcessChannelWorker.perform_async(team&.id, channel, game_number, true)
     render plain: "OK", status: 200
   end
 end
