@@ -3,7 +3,7 @@ class EventsController < ApplicationController
 
   def index
     return render plain: "Unauthorized", status: 401 if params[:token] != ENV['SLACK_VERIFICATION_TOKEN']
-    event_type = params[:type]
+    event_type = params.dig(:event, :type) || params[:type]
     case event_type
     when 'url_verification'
       verify_url
