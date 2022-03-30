@@ -1,7 +1,6 @@
 class ProcessChannelWorker < ApplicationWorker
-  def perform(team_id, channel_id, game_number = nil)
+  def perform(team_id, channel_id, game_number)
     team = Team.find(team_id)
-    game_number ||= Wordle.yesterdays_game
     logger.info "Processing scores for Wordle #{game_number} in channel #{channel_id} in team #{team.team_id}"
     scores = team.wordle_scores_in_channel(channel_id: channel_id, game_number: game_number)
     return if scores.blank?
