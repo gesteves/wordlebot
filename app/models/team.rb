@@ -38,7 +38,6 @@ include ActionView::Helpers::TextHelper
 
   def wordle_scores_in_channel(channel_id:, game_number:)
     return if has_invalid_token?
-    regex = Wordle.regex(game_number: game_number)
     slack = Slack.new
     messages = []
     has_more = true
@@ -54,7 +53,7 @@ include ActionView::Helpers::TextHelper
       has_more = response[:has_more]
     end
 
-    scores = messages.select { |m| m[:text] =~ regex }.uniq { |m| m[:user] }.map { |m| clean_up_message(message: m, regex: regex) }.compact.reverse
+    scores = messages.map { |m| clean_up_message(message: m, game_number: game_number) }.compact.uniq { |m| m[:user] }.map { |m| add_user_info(m) }.reverse
     logger.info "Found #{pluralize(scores&.size, 'score')} for Wordle #{game_number} in channel #{channel_id}"
     scores
   end
@@ -78,21 +77,22 @@ include ActionView::Helpers::TextHelper
 
   private
 
-  def clean_up_message(message:, regex:)
-    slack = Slack.new
-    user_id = message[:user]
+  def clean_up_message(message:, game_number:)
+    regex = Wordle.regex(game_number: game_number)
     text = regex.match(message[:text])&.values_at(0)&.first
     return if text.blank?
-    response = slack.user_info(access_token: access_token, user_id: user_id)
+    {
+      text: text,
+      user: message[:user]
+    }
+  end
+
+  def add_user_info(message)
+    slack = Slack.new
+    response = slack.user_info(access_token: access_token, user_id: message[:user])
     raise response[:error] unless response[:ok]
     image = response.dig(:user, :profile, :image_192).presence || response.dig(:user, :profile, :image_72).presence || response.dig(:user, :profile, :image_48).presence || response.dig(:user, :profile, :image_32).presence || response.dig(:user, :profile, :image_24).presence || response.dig(:user, :profile, :image_original).presence
     name = response.dig(:user, :real_name).presence || response.dig(:user, :name).presence
-
-    {
-      text: text,
-      user: user_id,
-      image: image,
-      name: name
-    }.compact
+    message.merge(image: image, name: name)
   end
 end
