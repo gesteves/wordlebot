@@ -23,7 +23,7 @@ module Wordle
   # @param game_number [Integer] The game number to match.
   # @return [Date] The date that game was or will be played
   def self.game_date(game_number:)
-    START_DATE + game_number.to_i.days
+    START_DATE + game_number.days
   end
 
   # Returns a regex to match Wordle results for a specific game.
