@@ -41,8 +41,8 @@ include ActionView::Helpers::TextHelper
     slack = Slack.new
     messages = []
     has_more = true
-    latest = Time.now.to_i
-    oldest = 2.days.ago.to_i
+    latest = (Wordle.game_date(game_number: game_number) + 1.day).end_of_day.to_i
+    oldest = (Wordle.game_date(game_number: game_number) - 1.day).beginning_of_day.to_i
 
     while has_more do
       response = slack.conversation_history(channel_id: channel_id, access_token: access_token, latest: latest, oldest: oldest)

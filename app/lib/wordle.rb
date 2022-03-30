@@ -19,6 +19,13 @@ module Wordle
     todays_game - 1
   end
 
+  # Returns the date for a given Wordle game
+  # @param game_number [Integer] The game number to match.
+  # @return [Date] The date that game was or will be played
+  def self.game_date(game_number:)
+    START_DATE + game_number.days
+  end
+
   # Returns a regex to match Wordle results for a specific game.
   # @param game_number [Integer] The game number to match.
   # @return [Regexp] A regex to match the results of a game.

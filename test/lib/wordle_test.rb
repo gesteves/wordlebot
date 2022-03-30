@@ -11,6 +11,10 @@ class WordleTest < ActiveSupport::TestCase
     assert_equal 278, Wordle.yesterdays_game
   end
 
+  test "returns the correct date for a given game" do
+    assert_equal Time.parse("March 30, 2022"), Wordle.game_date(game_number: 284)
+  end
+
   test "correctly detects Wordle scores for a specific game" do
     assert Wordle.regex(game_number: 278).match? "Wordle 278 1/6*"
     assert Wordle.regex(game_number: 278).match? "Wordle 278 2/6*"
