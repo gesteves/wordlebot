@@ -89,7 +89,7 @@ module Wordle
   def self.result_section(title:, results:, users:, total_games:, emoji: ":large_green_square:", bg_emoji: ":white_large_square:")
     return [] if results == 0
     max_results = 10
-    scaled_results = ((results.to_f * max_results)/total_games).round
+    scaled_results = ((results.to_f * max_results)/total_games).ceil
 
     blocks = []
 
