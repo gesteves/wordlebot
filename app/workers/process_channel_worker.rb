@@ -3,7 +3,7 @@ class ProcessChannelWorker < ApplicationWorker
     return if team_id.blank? || channel_id.blank? || game_number.blank?
     game_number = game_number.to_i
     team = Team.find(team_id)
-    logger.info "Processing scores for Wordle #{game_number} in channel #{channel_id} in team #{team.team_id}"
+    logger.info "[LOG] [Team #{team.team_id}] [Channel #{channel_id}] Processing scores for Wordle #{game_number}"
     scores = team.wordle_scores_in_channel(channel_id: channel_id, game_number: game_number)
     if scores.blank?
       return unless notify_no_scores

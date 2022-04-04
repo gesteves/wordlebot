@@ -10,7 +10,7 @@ class AuthController < ApplicationController
         team = Team.find_or_create_by(team_id: team_id)
         team.access_token = access_token
         if team.save
-          logger.info "Team #{team_id} authenticated with the following scopes: #{token[:scope]}"
+          logger.info "[LOG] [Team #{team_id}] Team authenticated with the following scopes: #{token[:scope]}"
           notice = nil
           url = success_url
         else

@@ -13,7 +13,7 @@ include ActionView::Helpers::TextHelper
 
   def channels_bot_is_member_of
     bot_channels = all_channels&.select { |c| c[:is_member] }
-    logger.info "Wordlebot is a member of #{pluralize(bot_channels&.size, 'channel')}"
+    logger.info "[LOG] [Team #{team_id}] Wordlebot is a member of #{pluralize(bot_channels&.size, 'channel')}"
     bot_channels
   end
 
@@ -32,7 +32,7 @@ include ActionView::Helpers::TextHelper
       cursor = response.dig(:response_metadata, :next_cursor)
       has_more = cursor.present?
     end
-    logger.info "Found #{pluralize(channels&.size, 'channel')} in team #{team_id}"
+    logger.info "[LOG] [Team #{team_id}] Found #{pluralize(channels&.size, 'channel')}"
     channels
   end
 
@@ -54,7 +54,7 @@ include ActionView::Helpers::TextHelper
     end
 
     scores = messages.map { |m| clean_up_message(message: m, game_number: game_number) }.compact.uniq { |m| m[:user] }.map { |m| add_user_info(m) }.reverse
-    logger.info "Found #{pluralize(scores&.size, 'score')} for Wordle #{game_number} in channel #{channel_id}"
+    logger.info "[LOG] [Team #{team_id}] [Channel #{channel_id}] Found #{pluralize(scores&.size, 'score')} for Wordle #{game_number}"
     scores
   end
 
@@ -63,7 +63,7 @@ include ActionView::Helpers::TextHelper
     slack = Slack.new
     response = slack.post_message(access_token: access_token, channel_id: channel_id, text: text, attachments: attachments, blocks: blocks)
     raise response[:error] unless response[:ok]
-    logger.info "Message sent to channel #{channel_id}"
+    logger.info "[LOG] [Team #{team_id}] [Channel #{channel_id}] Message sent to channel"
     response
   end
 
@@ -71,7 +71,7 @@ include ActionView::Helpers::TextHelper
     slack = Slack.new
     response = slack.auth_test(access_token: access_token)
     invalid_token = !response[:ok] && INVALID_AUTH_ERRORS.include?(response[:error])
-    logger.error "Team #{team_id} has an invalidated token" if invalid_token
+    logger.error "[LOG] [Team #{team_id}] Team has an invalidated token" if invalid_token
     invalid_token
   end
 
