@@ -27,6 +27,6 @@ class AuthController < ApplicationController
       logger.error "Authentication failed for the following reason: #{params[:error]}"
       notice = "Wordlebot was not added to your Slack. Please try again!"
     end
-    redirect_to url, notice: notice
+    redirect_to url, notice: notice, allow_other_host: true
   end
 end
