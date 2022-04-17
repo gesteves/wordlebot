@@ -1,4 +1,7 @@
 class AuthController < ApplicationController
+  skip_before_action :verify_authenticity_token
+  before_action :no_cache
+
   def index
     url = root_url
     if params[:code].present?
