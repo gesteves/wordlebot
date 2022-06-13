@@ -31,6 +31,7 @@ include ActionView::Helpers::TextHelper
       channels += response[:channels]
       cursor = response.dig(:response_metadata, :next_cursor)
       has_more = cursor.present?
+      sleep 1
     end
     logger.info "[LOG] [Team #{team_id}] Found #{pluralize(channels&.size, 'channel')}"
     channels
